@@ -55,13 +55,16 @@ class COPRAS(MCDM_method):
 
     @staticmethod
     def _copras(matrix, weights, types, mad, s_coeff):
-        # Normalize matrix using the linear normalization
+        # Normalize the matrix using linear normalization.
         norm_matrix = matrix/np.sum(matrix, axis = 0)
-        # Create the weighted normalized decision matrix by multiplying normalized matrix by criteria weights
-        # `mad` parameter set to True means that it is the SSP-COPRAS method
+        # Create the weighted normalized decision matrix by multiplying a normalized matrix by criteria weights
+        # `mad` parameter set to True means that it is the SSP-COPRAS method.
         if mad == True:
+            # Calculate the mean deviation values of the normalized matrix.
             std_val = norm_matrix - np.mean(norm_matrix, axis = 0)
 
+            # Set as 0, those mean deviation values that for profit criteria are lower than 0
+            # and those mean deviation values that for cost criteria are higher than 0
             for j in range(norm_matrix.shape[1]):
                 for i in range(norm_matrix.shape[0]):
                     if types[j] == 1:
@@ -71,12 +74,18 @@ class COPRAS(MCDM_method):
                         if std_val[i, j] > 0:
                             std_val[i, j] = 0
 
+            # Multiply mean deviation values by sustainability coefficient.
             std_val = std_val * s_coeff
+            # Subtract from normalized matrix standard deviation values multiplied by a sustainable coefficient.
             norm_matrix = norm_matrix - std_val
+        # Multiply all values in the normalized matrix by weights.
         d = norm_matrix * weights
+        # Calculate the sums of weighted normalized outcomes for profit criteria.
         Sp = np.sum(d[:, types == 1], axis = 1)
+        # Calculate the sums of weighted normalized outcomes for cost criteria.
         Sm = np.sum(d[:, types == -1], axis = 1)
+        # Calculate the relative priority Q of evaluated options.
         Q = Sp + ((np.sum(Sm))/(Sm * np.sum(1 / Sm)))
-        # Q = Sp + ((np.min(Sm) * np.sum(Sm))/(Sm * np.sum(np.min(Sm) / Sm)))
+        # Calculate the quantitive utility value for each of the evaluated options.
         U = Q / np.max(Q)
         return U

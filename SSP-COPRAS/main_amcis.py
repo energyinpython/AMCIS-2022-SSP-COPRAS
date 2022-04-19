@@ -11,6 +11,7 @@ from rank_preferences import rank_preferences
 from copras import COPRAS
 
 def main():
+    # Criteria indexes of each main dimension.
     modules_indexes = [
         [0, 1, 2, 3, 4, 5, 6],
         [7, 8, 9, 10, 11, 12, 13],
@@ -38,18 +39,22 @@ def main():
     matrix = df_data.to_numpy()
 
     weights_type = 'gini'
+    # Calculate criteria weights using an objective weighting method called Gini coefficient-based weighting method.
     weights = gini_weighting(matrix)
 
-    # Save calculated criteria weights to CSV file
+    # Save calculated criteria weights to the CSV file.
     crit_list = [r'$C_{' + str(i + 1) + '}$' for i in range(0, df_data.shape[1])]
     df_weights = pd.DataFrame(weights.reshape(1, -1), index = ['Weights'], columns = crit_list)
     df_weights.to_csv('results/weights_' + weights_type + '.csv')
 
-    # Initialize the COPRAS method object
+    # Initialize the COPRAS method object.
     copras = COPRAS()
+    # Calculate COPRAS preference values of alternatives.
     pref = copras(matrix, weights, types)
+    # Rank alternatives according to COPRAS preference values in descending order. The option with the highest COPRAS preference value is the best one.
     rank = rank_preferences(pref, reverse = True)
 
+    # Save results including preference values and ranking in DataFrame and CSV file.
     results['Utility'] = pref
     results['Rank'] = rank
     df_compared['Full compensation'] = rank
@@ -59,27 +64,34 @@ def main():
 
     plt.style.use('seaborn')
     #
-    # Application of the SSP-AHP method
+    # Apply the SSP-AHP method.
     # Changes in the coefficient s in all criteria dimensions are applied simultaneously
     # The value 0 of the s coefficient corresponds to the application of the classical COPRAS method.
+    # Create the DataFrame for rankings for different sustainability coefficient values.
     df_sust = pd.DataFrame(index = list_alt_names)
+    # Create the DataFrame for COPRAS preference values for different sustainability coefficient values.
     df_sust_pref = copy.deepcopy(df_sust)
     sust_coeffs = np.arange(0, 1.05, 0.05)
+    # Iterate by each value of the sustainability coefficient.
     for s in sust_coeffs:
         s_set = np.ones(matrix.shape[1]) * s
         # `mad` parameter set to True means that it is the SSP-COPRAS method used with the s coefficient
         # `mad` is set to False by default for the calssical version of the COPRAS method
+        # Calculate the SSP-COPRAS preference values for a given sustainability coefficient.
         pref = copras(matrix, weights, types, mad = True, s_coeff = s_set)
         df_sust_pref[str(s)] = pref
+        # Determine the SSP-COPRAS ranking for a given sustainability coefficient.
         rank = rank_preferences(pref, reverse = True)
         df_sust[str(s)] = rank
+    # Save results from DataFrames to CSV files.
     df_sust_pref.to_csv('results/sust_utility_vals_' + weights_type + '.csv')
     df_sust.to_csv('results/sust_rank_' + weights_type + '.csv')
-    pdf = plot_sustainability(sust_coeffs, df_sust, weights_type)
+    # Display chart of rankings obtained for each sustainability coefficient value.
+    plot_sustainability(sust_coeffs, df_sust, weights_type)
 
+    # Save rankings for full criteria compensation and fully reduced criteria compensation in CSV.
     df_compared['Reduced compensation'] = rank
     df_compared.to_csv('results/compared.csv')
-
 
 if __name__ == '__main__':
     main()

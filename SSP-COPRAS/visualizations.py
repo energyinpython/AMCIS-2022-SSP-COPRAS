@@ -2,6 +2,28 @@ import matplotlib.pyplot as plt
 
 
 def plot_sustainability(vec, data_sust, weights_type = '', no = '', title = ''):
+    """
+    This function is used to plot alternatives rankings considering their changing
+    due to changing sustainability coefficient.
+
+    Parameters
+    ------------
+        vec : ndarray
+            Vector with values of sustainability coefficient for each criterion.
+        data_sust : dataframe
+            DataFrame including particular rankings in columns for each value of 
+            sustainability coeffcient
+        weights_type : str
+            Name of criteria weighting method
+        no : str
+            Number of chart (optional, if you want to plot multiple figures)
+        title : str
+            Tile of chart (optional)
+
+    Examples
+    ---------
+    >>> plot_sustainability(sust_coeffs, df_sust, weights_type)
+    """
     color = []
     for i in range(8):
         color.append(plt.cm.Set1(i))
@@ -30,6 +52,4 @@ def plot_sustainability(vec, data_sust, weights_type = '', no = '', title = ''):
     plt.tight_layout()
     plt.savefig('./results_png/' + no + 'sustainability_' + weights_type + '.png')
     plt.savefig('./results/' + no + 'sustainability_' + weights_type + '.pdf')
-    pdf = './results/' + no + 'sustainability_' + weights_type + '.pdf'
-    return pdf
-    #plt.show()
+    plt.show()
