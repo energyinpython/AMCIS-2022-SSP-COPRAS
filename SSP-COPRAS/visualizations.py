@@ -2,11 +2,18 @@ import matplotlib.pyplot as plt
 
 
 def plot_sustainability(vec, data_sust, weights_type = '', no = '', title = ''):
+    color = []
+    for i in range(8):
+        color.append(plt.cm.Set1(i))
+
+    for i in range(8):
+        color.append(plt.cm.Dark2(i))
+
     vec = vec * 100
-    plt.figure(figsize = (7, 6))
+    plt.figure(figsize = (7, 4))
     for j in range(data_sust.shape[0]):
         
-        plt.plot(vec, data_sust.iloc[j, :], linewidth = 2)
+        plt.plot(vec, data_sust.iloc[j, :], color = color[j], linewidth = 2)
         ax = plt.gca()
         y_min, y_max = ax.get_ylim()
         x_min, x_max = ax.get_xlim()
